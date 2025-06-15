@@ -3,21 +3,22 @@ const express = require('express');
 const router = express.Router();
 const { 
   registerUser, loginUser, getUserProfile, getUsers,
-  deleteUser, // <-- Импорт
-  updateUser, // <-- Импорт
-  getUserById,
+  deleteUser, updateUser, getUserById,
 } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-router.route('/register').post(registerUser);
-router.route('/login').post(loginUser);
-router.route('/profile').get(protect, getUserProfile);
+// Сначала самые конкретные роуты
+router.post('/register', registerUser);
+router.post('/login', loginUser);
+router.get('/profile', protect, getUserProfile);
 
+// Общий роут без параметров
 router.route('/').get(protect, admin, getUsers);
 
+// Роут с параметром - в самом конце
 router.route('/:id')
     .get(protect, admin, getUserById)
-    .delete(protect, admin, deleteUser) // <-- Новый роут
-    .put(protect, admin, updateUser);   // <-- Новый роут
+    .delete(protect, admin, deleteUser)
+    .put(protect, admin, updateUser);
 
 module.exports = router;
