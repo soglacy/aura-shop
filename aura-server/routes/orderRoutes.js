@@ -1,0 +1,18 @@
+// aura-server/routes/orderRoutes.js
+const express = require('express');
+const router = express.Router();
+const {
+  addOrderItems, getOrderById, getMyOrders, getOrders,
+  updateOrderToDelivered, // <-- Импорт
+  deleteOrder,            // <-- Импорт
+} = require('../controllers/orderController');
+const { protect, admin } = require('../middleware/authMiddleware');
+
+router.route('/').post(protect, addOrderItems).get(protect, admin, getOrders);
+router.route('/myorders').get(protect, getMyOrders);
+
+router.route('/:id/deliver').put(protect, admin, updateOrderToDelivered); // <-- Новый роут
+router.route('/:id').get(protect, getOrderById).delete(protect, admin, deleteOrder); // <-- Добавили DELETE
+ 
+
+module.exports = router;
