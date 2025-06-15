@@ -9,7 +9,7 @@
     "data:import": "node seeder.js",
     "data:destroy": "node seeder.js -d",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm install --prefix ../my-project && npm run build --prefix ../my-project"
+    "build": "npm install && npm install --prefix ../my-project && npm run build --prefix ../my-project"
   },
   "keywords": [],
   "author": "",
