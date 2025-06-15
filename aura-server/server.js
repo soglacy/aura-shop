@@ -77,14 +77,21 @@ const startServer = async () => {
 
     console.log('>>> [DEBUG] Все роуты успешно подключены. Начинаем настройку статики...');
 
-    // --- Остальной код без изменений ---
-    if (process.env.NODE_ENV === 'production') {
-      const frontendBuildPath = path.join(__dirname, '..', 'my-project', 'build');
-      app.use(express.static(frontendBuildPath));
-      app.get('*', (req, res) =>
-        res.sendFile(path.resolve(frontendBuildPath, 'index.html'))
-      );
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '..', 'my-project', 'build');
+  app.use(express.static(frontendBuildPath));
+  
+  // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+  // Вместо app.get('*', ...) используем app.use со специальным обработчиком
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      res.sendFile(path.resolve(frontendBuildPath, 'index.html'));
     } else {
+      next();
+    }
+  });
+
+} else {
       app.get('/', (req, res) => { res.send('Aura API запущен...'); });
     }
 
