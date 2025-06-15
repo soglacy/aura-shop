@@ -8,6 +8,10 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
     "axios": "^1.9.0",
     "rc-slider": "^11.1.8",
     "react": "^19.1.0",
@@ -44,10 +48,6 @@
     ]
   },
   "devDependencies": {
-    "@tailwindcss/line-clamp": "^0.4.4",
-    "@tailwindcss/typography": "^0.5.16",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17"
+    "@tailwindcss/line-clamp": "^0.4.4"
   }
 }
