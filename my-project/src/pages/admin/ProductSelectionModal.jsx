@@ -5,9 +5,6 @@ import { FaSearch, FaTimes } from 'react-icons/fa';
 const ProductSelectionModal = ({ isOpen, onClose, allProducts, onSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
-    if (!isOpen) return null;
-
-    // Используем useMemo для оптимизации, чтобы не пересчитывать на каждый рендер
     const productsWithFullName = useMemo(() => {
         return allProducts.map(p => {
             const { name = [], ram, storage, color, customId = '' } = p;
@@ -24,6 +21,11 @@ const ProductSelectionModal = ({ isOpen, onClose, allProducts, onSelect }) => {
     const filteredProducts = productsWithFullName.filter(p => 
         p.searchString.includes(searchTerm.toLowerCase())
     );
+
+
+    if (!isOpen) {
+        return null; // Теперь ранний возврат не мешает хукам
+    }
 
     return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[101] p-4">
@@ -51,7 +53,7 @@ const ProductSelectionModal = ({ isOpen, onClose, allProducts, onSelect }) => {
                                 key={product._id} 
                                 onClick={() => {
                                     onSelect(product);
-                                    onClose(); // Закрываем модалку после выбора
+                                    onClose();
                                 }}
                                 className="flex items-center p-2 rounded-md hover:bg-brand-blue/20 cursor-pointer transition-colors"
                             >
