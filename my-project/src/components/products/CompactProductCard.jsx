@@ -5,6 +5,7 @@ import { FiArrowUpRight, FiTag } from 'react-icons/fi';
 const CompactProductCard = ({ product }) => {
   if (!product) return null;
 
+  // Логика получения данных остается прежней
   const { imageUrl, name, productLink, shortDescription, priceValue, salePriceValue, onSale, ram, storage, color } = product; 
   
   const fullProductName = [
@@ -41,18 +42,12 @@ const CompactProductCard = ({ product }) => {
       </a>
       
       <div className="p-3 md:p-4 flex flex-col flex-grow">
-       
         <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-brand-blue transition-colors duration-300 mb-1 h-10 sm:h-12 flex items-center" title={fullProductName}>
           <a href={productLink || '#'} className="line-clamp-2 hover:underline">
             {fullProductName}
           </a>
         </h3>
-      
-        {shortDescription && (
-          <p className="text-xs text-brand-gray-light mb-2 truncate h-4" title={shortDescription}>
-            {shortDescription}
-          </p>
-        )}
+        
 
         <div className="mt-auto flex items-baseline gap-2">
             <p className={`font-bold ${oldPrice ? 'text-red-500' : 'text-brand-blue'} text-sm md:text-base`}>

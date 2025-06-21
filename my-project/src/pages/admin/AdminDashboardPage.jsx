@@ -8,7 +8,6 @@ import ProductSelectionModal from './ProductSelectionModal';
 
 // --- Вспомогательный компонент для карточки товара в дашборде ---
 const DashboardProductCard = ({ product, onClick, onRemove }) => {
-    // Собираем полное имя для отображения
     const { name = [], ram, storage, color } = product;
     const displayName = [name[0], ram && storage ? `(${ram}/${storage}ГБ)` : '', color].filter(Boolean).join(' ').trim();
 
@@ -19,8 +18,8 @@ const DashboardProductCard = ({ product, onClick, onRemove }) => {
                 <p className="text-xs text-white h-8 flex items-center justify-center">{displayName}</p>
                 <p className="text-xs text-gray-400 mt-1">{product.price}</p>
             </div>
-            <button onClick={onRemove} title="Убрать" className="absolute top-1 right-1 bg-red-600/50 text-white rounded-full p-1 hover:bg-red-500 transition-all">
-                <FaTrash size={10}/>
+            <button onClick={onRemove} title="Убрать" className="absolute top-1 right-1 text-gray-500 hover:text-red-500 transition-colors p-1">
+                <FaTrash size={12}/>
             </button>
         </div>
     );
@@ -47,18 +46,16 @@ const DashboardBlogCard = ({ post, onEdit, onImageUpload, onRemove }) => (
                 </div>
             </label>
         </div>
-        <input type="file" id={`upload-${post._id}`} className="hidden" onChange={(e) => onImageUpload(e, post._id)}/>
-        <input type="text" placeholder="Заголовок" value={post.title} onChange={(e) => onEdit(post._id, 'title', e.target.value)}
+        <input type="file" id={`upload-${post._id}`} className="hidden" onChange={(e) => onImageUpload(e)} />
+        <input type="text" placeholder="Заголовок" value={post.title} onChange={(e) => onEdit('title', e.target.value)}
                className="text-sm font-semibold text-white bg-transparent w-full text-center outline-none focus:ring-1 focus:ring-brand-blue rounded-sm p-1"/>
-        {/* Поле slug теперь невидимо и нередактируемо для пользователя */}
-        <input type="text" value={post.slug} readOnly
-               className="hidden"/>
-        <textarea placeholder="Краткое описание" value={post.excerpt} onChange={(e) => onEdit(post._id, 'excerpt', e.target.value)}
+        <input type="text" value={post.slug} readOnly className="hidden"/>
+        <textarea placeholder="Краткое описание" value={post.excerpt} onChange={(e) => onEdit('excerpt', e.target.value)}
                className="text-xs text-gray-400 bg-transparent w-full text-center outline-none focus:ring-1 focus:ring-brand-blue rounded-sm resize-none h-12"/>
-        <textarea placeholder="Полный текст статьи..." value={post.fullText} onChange={(e) => onEdit(post._id, 'fullText', e.target.value)}
+        <textarea placeholder="Полный текст статьи..." value={post.fullText} onChange={(e) => onEdit('fullText', e.target.value)}
                className="text-xs text-gray-400 bg-transparent w-full text-center outline-none focus:ring-1 focus:ring-brand-blue rounded-sm flex-grow resize-none h-24"/>
-        <button onClick={onRemove} title="Удалить пост" className="absolute top-1 right-1 bg-red-600/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all">
-            <FaTrash size={10}/>
+        <button onClick={onRemove} title="Удалить пост" className="absolute top-1 right-1 text-gray-500 hover:text-red-500 transition-colors p-1">
+            <FaTrash size={12}/>
         </button>
     </div>
 );
@@ -74,32 +71,29 @@ const DashboardSliderCard = ({ slide, onEdit, onImageUpload, onRemove }) => (
                 </div>
             </label>
         </div>
-        <input type="file" id={`upload-slider-${slide._id}`} className="hidden" onChange={(e) => onImageUpload(e, slide._id)}/>
-        
-        <input type="text" placeholder="Подзаголовок" value={slide.subTitle} onChange={(e) => onEdit(slide._id, 'subTitle', e.target.value)}
+        <input type="file" id={`upload-slider-${slide._id}`} className="hidden" onChange={(e) => onImageUpload(e)} />
+        <input type="text" placeholder="Подзаголовок" value={slide.subTitle} onChange={(e) => onEdit('subTitle', e.target.value)}
                className="text-xs text-brand-blue bg-transparent w-full outline-none focus:ring-1 focus:ring-brand-blue rounded-sm p-1"/>
-        <input type="text" placeholder="Заголовок (строка 1)" value={slide.titleLine1} onChange={(e) => onEdit(slide._id, 'titleLine1', e.target.value)}
+        <input type="text" placeholder="Заголовок (строка 1)" value={slide.titleLine1} onChange={(e) => onEdit('titleLine1', e.target.value)}
                className="text-sm font-semibold text-white bg-transparent w-full outline-none focus:ring-1 focus:ring-brand-blue rounded-sm p-1"/>
-        <input type="text" placeholder="Заголовок (строка 2)" value={slide.titleLine2} onChange={(e) => onEdit(slide._id, 'titleLine2', e.target.value)}
+        <input type="text" placeholder="Заголовок (строка 2)" value={slide.titleLine2} onChange={(e) => onEdit('titleLine2', e.target.value)}
                className="text-sm font-semibold text-white bg-transparent w-full outline-none focus:ring-1 focus:ring-brand-blue rounded-sm p-1"/>
-        <input type="text" placeholder="Текст кнопки" value={slide.buttonText} onChange={(e) => onEdit(slide._id, 'buttonText', e.target.value)}
+        <input type="text" placeholder="Текст кнопки" value={slide.buttonText} onChange={(e) => onEdit('buttonText', e.target.value)}
                className="text-xs bg-transparent w-full outline-none focus:ring-1 focus:ring-brand-blue rounded-sm p-1"/>
-        <input type="text" placeholder="Ссылка для кнопки" value={slide.buttonLink} onChange={(e) => onEdit(slide._id, 'buttonLink', e.target.value)}
+        <input type="text" placeholder="Ссылка для кнопки" value={slide.buttonLink} onChange={(e) => onEdit('buttonLink', e.target.value)}
                className="text-xs bg-transparent w-full outline-none focus:ring-1 focus:ring-brand-blue rounded-sm p-1"/>
-        
-        <button onClick={onRemove} title="Удалить слайд" className="absolute top-1 right-1 bg-red-600/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all">
-            <FaTrash size={10}/>
+        <button onClick={onRemove} title="Удалить слайд" className="absolute top-1 right-1 text-gray-500 hover:text-red-500 transition-colors p-1">
+            <FaTrash size={12}/>
         </button>
     </div>
 );
 
-// --- Основной компонент Дашборда ---
+// --- Основной компонент ---
 const AdminDashboardPage = () => {
     const { userInfo } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
-    
     const [homepageContent, setHomepageContent] = useState({
         sliderBanners: [],
         featuredProducts: [],
@@ -107,7 +101,6 @@ const AdminDashboardPage = () => {
         blogPosts: [],
     });
     const [allProducts, setAllProducts] = useState([]);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingConfig, setEditingConfig] = useState({ section: null, index: -1 });
 
@@ -121,15 +114,8 @@ const AdminDashboardPage = () => {
                     axios.get('/api/products?from=admin')
                 ]);
                 
-                const blogPostsWithKeys = (contentRes.data.blogPosts || []).map(post => ({
-                    ...post,
-                    _id: post._id || (new Date().getTime() + Math.random()), 
-                }));
-                
-                const slidersWithKeys = (contentRes.data.sliderBanners || []).map(slide => ({
-                    ...slide,
-                    _id: slide._id || (new Date().getTime() + Math.random()),
-                }));
+                const blogPostsWithKeys = (contentRes.data.blogPosts || []).map(post => ({ ...post, _id: post.slug || post.title }));
+                const slidersWithKeys = (contentRes.data.sliderBanners || []).map((slide, i) => ({ ...slide, _id: slide.buttonLink || i.toString() }));
 
                 setHomepageContent({ 
                     ...(contentRes.data || {}), 
@@ -137,7 +123,6 @@ const AdminDashboardPage = () => {
                     sliderBanners: slidersWithKeys,
                 });
                 setAllProducts(productsRes.data);
-
             } catch (err) {
                 setError('Ошибка загрузки данных для дашборда. ' + (err.response?.data?.message || err.message));
             } finally {
@@ -148,11 +133,6 @@ const AdminDashboardPage = () => {
     }, [userInfo]);
 
     const handleOpenModal = (section, index) => {
-        const items = homepageContent[section] || [];
-        if (items.length >= 4 && index >= items.length) {
-            alert('Максимальное количество товаров в этой секции - 4. Замените один из существующих.');
-            return;
-        }
         setEditingConfig({ section, index });
         setIsModalOpen(true);
     };
@@ -160,9 +140,13 @@ const AdminDashboardPage = () => {
     const handleProductSelect = (selectedProduct) => {
         const { section, index } = editingConfig;
         setHomepageContent(prev => {
-            const newSectionData = [...(prev[section] || [])];
-            newSectionData[index] = selectedProduct;
-            return { ...prev, [section]: newSectionData };
+            const currentItems = prev[section] ? [...prev[section]] : [];
+            if (index < currentItems.length) {
+                currentItems[index] = selectedProduct;
+            } else {
+                currentItems.push(selectedProduct);
+            }
+            return { ...prev, [section]: currentItems };
         });
         setIsModalOpen(false);
     };
@@ -176,12 +160,7 @@ const AdminDashboardPage = () => {
     
     const slugify = (text = '') => {
         const a = {"Ё":"YO","Й":"I","Ц":"TS","У":"U","К":"K","Е":"E","Н":"N","Г":"G","Ш":"SH","Щ":"SCH","З":"Z","Х":"H","Ъ":"","ё":"yo","й":"i","ц":"ts","у":"u","к":"k","е":"e","н":"n","г":"g","ш":"sh","щ":"sch","з":"z","х":"h","ъ":"","Ф":"F","Ы":"I","В":"V","А":"a","П":"P","Р":"R","О":"O","Л":"L","Д":"D","Ж":"ZH","Э":"E","ф":"f","ы":"i","в":"v","а":"a","п":"p","р":"r","о":"o","л":"l","д":"d","ж":"zh","э":"e","Я":"Ya","Ч":"CH","С":"S","М":"M","И":"I","Т":"T","Ь":"","Б":"B","Ю":"YU","я":"ya","ч":"ch","с":"s","м":"m","и":"i","т":"t","ь":"","б":"b","ю":"yu"};
-        return text.split('').map((char) => a[char] || char).join('')
-                   .toLowerCase()
-                   .replace(/[^a-z0-9\s-]/g, '')
-                   .trim()
-                   .replace(/\s+/g, '-')
-                   .replace(/-+/g, '-');
+        return text.split('').map((char) => a[char] || char).join('').toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
     };
 
     const handleBlogEdit = (postId, field, value) => {
@@ -200,7 +179,7 @@ const AdminDashboardPage = () => {
         }));
     };
 
-    const handleBlogImageUpload = async (e, postId) => {
+    const handleImageUpload = async (e, id, type) => {
         const file = e.target.files[0];
         if (!file) return;
         const formData = new FormData();
@@ -208,7 +187,12 @@ const AdminDashboardPage = () => {
         try {
             const config = { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.post('/api/upload', formData, config);
-            handleBlogEdit(postId, 'imageUrl', data.image);
+            
+            if (type === 'blog') {
+                handleBlogEdit(id, 'imageUrl', data.image);
+            } else if (type === 'slider') {
+                handleSliderEdit(id, 'imageUrl', data.image);
+            }
         } catch (err) {
             alert('Ошибка загрузки: ' + (err.response?.data?.message || err.message));
         }
@@ -239,20 +223,6 @@ const AdminDashboardPage = () => {
         }));
     };
 
-    const handleSliderImageUpload = async (e, slideId) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const formData = new FormData();
-        formData.append('image', file);
-        try {
-            const config = { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.post('/api/upload', formData, config);
-            handleSliderEdit(slideId, 'imageUrl', data.image);
-        } catch (err) {
-            alert('Ошибка загрузки: ' + (err.response?.data?.message || err.message));
-        }
-    };
-
     const addSlider = () => {
         const newSlide = {
             _id: new Date().getTime().toString(),
@@ -277,13 +247,12 @@ const AdminDashboardPage = () => {
             }));
         }
     };
-
+    
     const handleSaveChanges = async () => {
         setSaving(true);
         setError('');
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            
             const blogPosts = homepageContent.blogPosts || [];
             const slugs = blogPosts.map(p => p.slug);
 
@@ -293,13 +262,14 @@ const AdminDashboardPage = () => {
             if (slugs.some((slug, index) => slugs.indexOf(slug) !== index)) {
                 throw new Error("Найдены одинаковые URL-слаги. Каждый слаг должен быть уникальным.");
             }
-            
+
             const payload = {
                 sliderBanners: homepageContent.sliderBanners.map(({_id, ...slide}) => slide),
                 featuredProducts: homepageContent.featuredProducts.map(p => p._id),
                 trendingProducts: homepageContent.trendingProducts.map(p => p._id),
-                blogPosts: blogPosts.map(({_id, ...post}) => post),
+                blogPosts: homepageContent.blogPosts.map(({_id, ...post}) => post),
             };
+            
             await axios.put('/api/content/homepage', payload, config);
             alert('Изменения сохранены!');
         } catch (err) {
@@ -313,17 +283,19 @@ const AdminDashboardPage = () => {
 
     const renderSection = (title, sectionKey, count) => {
         const items = homepageContent[sectionKey] || [];
-        const placeholders = Math.max(0, count - items.length);
+        const displayItems = Array.from({ length: count });
         return (
             <div className="bg-brand-bg-black p-6 rounded-lg shadow-lg">
                 <h2 className="text-xl font-semibold text-white mb-4">{title}</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {items.map((prod, index) => (
-                        <DashboardProductCard key={(prod._id || index) + sectionKey} product={prod} onClick={() => handleOpenModal(sectionKey, index)} onRemove={() => handleRemoveItem(sectionKey, index)} />
-                    ))}
-                    {items.length < count && [...Array(placeholders)].map((_, index) => (
-                         <DashboardItemPlaceholder key={`ph-${sectionKey}-${index}`} onClick={() => handleOpenModal(sectionKey, items.length + index)} />
-                    ))}
+                    {displayItems.map((_, index) => {
+                        const product = items[index];
+                        if (product) {
+                            return <DashboardProductCard key={product._id || index} product={product} onClick={() => handleOpenModal(sectionKey, index)} onRemove={() => handleRemoveItem(sectionKey, index)} />;
+                        } else {
+                            return <DashboardItemPlaceholder key={`ph-${sectionKey}-${index}`} onClick={() => handleOpenModal(sectionKey, index)} />;
+                        }
+                    })}
                 </div>
             </div>
         );
@@ -331,12 +303,7 @@ const AdminDashboardPage = () => {
 
     return (
         <>
-            <ProductSelectionModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)}
-                allProducts={allProducts}
-                onSelect={handleProductSelect}
-            />
+            <ProductSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} allProducts={allProducts} onSelect={handleProductSelect}/>
             <div className="space-y-8">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-semibold text-white">Управление главной страницей</h1>
@@ -350,9 +317,7 @@ const AdminDashboardPage = () => {
                         </button>
                     </div>
                 </div>
-
                 {error && <div className="p-4 bg-red-900/50 rounded-lg text-red-300 text-sm">{error}</div>}
-                
                 <div className="bg-brand-bg-black p-6 rounded-lg shadow-lg">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-white">Управление слайдером</h2>
@@ -361,21 +326,19 @@ const AdminDashboardPage = () => {
                         </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {(homepageContent.sliderBanners || []).map((slide) => (
+                        {(homepageContent.sliderBanners || []).map((slide, index) => (
                             <DashboardSliderCard 
-                                key={slide._id} 
+                                key={slide._id || index} 
                                 slide={slide} 
-                                onEdit={handleSliderEdit} 
-                                onImageUpload={handleSliderImageUpload} 
+                                onEdit={(field, value) => handleSliderEdit(slide._id, field, value)} 
+                                onImageUpload={(e) => handleImageUpload(e, slide._id, 'slider')} 
                                 onRemove={() => handleRemoveSlider(slide._id)}
                             />
                         ))}
                     </div>
                 </div>
-
                 {renderSection('Aura Рекомендует', 'featuredProducts', 4)}
                 {renderSection('Тренды этой недели', 'trendingProducts', 4)}
-
                 <div className="bg-brand-bg-black p-6 rounded-lg shadow-lg">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-white">Наш Блог</h2>
@@ -385,7 +348,13 @@ const AdminDashboardPage = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {(homepageContent.blogPosts || []).map((post, index) => (
-                            <DashboardBlogCard key={post._id || index} post={post} onEdit={handleBlogEdit} onImageUpload={handleBlogImageUpload} onRemove={() => handleRemoveItem('blogPosts', index)}/>
+                            <DashboardBlogCard 
+                                key={post._id || index} 
+                                post={post} 
+                                onEdit={(field, value) => handleBlogEdit(post._id, field, value)} 
+                                onImageUpload={(e) => handleImageUpload(e, post._id, 'blog')} 
+                                onRemove={() => handleRemoveItem('blogPosts', index)}
+                            />
                         ))}
                     </div>
                 </div>
