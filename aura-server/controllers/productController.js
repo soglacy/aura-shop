@@ -44,27 +44,37 @@ const getProductByIdForAdmin = asyncHandler(async (req, res) => {
 });
 
 // @desc    Создать новый товар (черновик)
+// @desc    Создать новый товар (черновик)
 const createProduct = asyncHandler(async (req, res) => {
   const timestamp = Date.now();
   const isCopy = Object.keys(req.body).length > 1;
   let productData;
+  const newCustomId = `product-${timestamp}`; // <-- Генерируем ID один раз
 
   if (isCopy) {
       const { _id, createdAt, updatedAt, ...copyData } = req.body;
-      const newCustomId = `product-${timestamp}`;
-      productData = { ...copyData, customId: newCustomId, isPublished: false, user: req.user._id };
+      productData = { 
+          ...copyData, 
+          customId: newCustomId, // <-- Используем новый ID
+          productLink: `/product/${newCustomId}`, // <-- АВТОМАТИЧЕСКИ ГЕНЕРИРУЕМ ССЫЛКУ
+          isPublished: false, 
+          user: req.user._id 
+      };
   } else {
-      const newCustomId = `product-${timestamp}`;
       productData = {
           name: [`Новый товар ${timestamp}`],
-          customId: newCustomId,
+          customId: newCustomId, // <-- Используем новый ID
           groupId: `group-${timestamp}`,
-          productLink: `/product/${newCustomId}`,
+          productLink: `/product/${newCustomId}`, // <-- АВТОМАТИЧЕСКИ ГЕНЕРИРУЕМ ССЫЛКУ
           user: req.user._id,
           isPublished: false,
-          imageUrl: '/images/placeholder.png', price: '0 ₽', priceValue: 0,
-          manufacturer: 'Не указан', countInStock: 0,
-          rating: 0, numReviews: 0,
+          imageUrl: '/images/placeholder.png', 
+          price: '0 ₽', 
+          priceValue: 0,
+          manufacturer: 'Не указан', 
+          countInStock: 0,
+          rating: 0, 
+          numReviews: 0,
       };
   }
   const product = new Product(productData);
@@ -76,11 +86,16 @@ const createProduct = asyncHandler(async (req, res) => {
 const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ customId: req.params.customId });
   if (product) {
-      // Самый надежный способ - использовать findByIdAndUpdate
+      const updateData = { ...req.body };
+      // Принудительно обновляем productLink на основе customId из данных
+      if (updateData.customId) {
+          updateData.productLink = `/product/${updateData.customId}`;
+      }
+      
       const updatedProduct = await Product.findByIdAndUpdate(
           product._id, 
-          req.body, // Передаем все тело запроса, Mongoose сам разберется
-          { new: true, runValidators: true } // Опции: вернуть новый документ и запустить валидаторы
+          updateData, // <-- Используем измененные данные
+          { new: true, runValidators: true } 
       );
       res.json(updatedProduct);
   } else {
@@ -109,7 +124,7 @@ const createProductReview = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Оценка и комментарий обязательны');
     }
-    const product = await Product.findOne({ customId: req.params.id });
+    const product = await Product.findOne({ customId: req.params.customId });
     if (product) {
         if (!product.isPublished) {
             res.status(400);
