@@ -9,16 +9,13 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 
 const brandsData = [
-  // Данные остаются без изменений
   { id: 1, name: 'Apple', logoUrl: '/images/brands/apple-logo.png', filterValue: 'Apple' },
   { id: 2, name: 'Samsung', logoUrl: '/images/brands/samsung-logo.png', filterValue: 'Samsung' },
-  { id: 3, name: 'Google', logoUrl: '/images/brands/google-logo.png', filterValue: 'Google' },
+  { id: 3, name: 'Honor', logoUrl: '/images/brands/honor-logo.png', filterValue: 'Honor' },
   { id: 4, name: 'Asus', logoUrl: '/images/brands/asus-logo.png', filterValue: 'Asus' },
-  { id: 5, name: 'Honor', logoUrl: '/images/brands/honor-logo.png', filterValue: 'Honor' },
-  { id: 6, name: 'Xiaomi', logoUrl: '/images/brands/xiaomi-logo.png', filterValue: 'Xiaomi' },
-  { id: 7, name: 'Realme', logoUrl: '/images/brands/realme-logo.png', filterValue: 'Realme' },
-  { id: 8, name: 'Sony', logoUrl: '/images/brands/sony-logo.png', filterValue: 'Sony' },
-  // ... и так далее
+  { id: 5, name: 'Realme', logoUrl: '/images/brands/realme-logo.png', filterValue: 'Realme' },
+  { id: 6, name: 'Sony', logoUrl: '/images/brands/sony-logo.png', filterValue: 'Sony' },
+  { id: 7, name: 'Infinix', logoUrl: '/images/brands/infinix-logo.png', filterValue: 'Infinix' },
 ];
 
 const BrandsCarousel = () => {

@@ -5,9 +5,13 @@ import { FiArrowUpRight, FiTag } from 'react-icons/fi';
 const CompactProductCard = ({ product }) => {
   if (!product) return null;
 
-  const { imageUrl, name, productLink, shortDescription, priceValue, salePriceValue, onSale } = product; 
+  const { imageUrl, name, productLink, shortDescription, priceValue, salePriceValue, onSale, ram, storage, color } = product; 
   
-  const nameString = Array.isArray(name) ? name.join(' ') : (name || '');
+  const fullProductName = [
+    name?.[0] || 'Название товара',
+    ram && storage ? `(${ram}/${storage}ГБ)` : '',
+    color || ''
+  ].filter(Boolean).join(' ').trim();
   
   const displayPrice = onSale && salePriceValue > 0 ? salePriceValue : priceValue;
   const oldPrice = onSale && salePriceValue > 0 && priceValue > salePriceValue ? priceValue : null;
@@ -26,7 +30,7 @@ const CompactProductCard = ({ product }) => {
       <a href={productLink || '#'} className="block aspect-square overflow-hidden relative">
         <img 
           src={imageUrl || '/images/placeholder.png'} 
-          alt={nameString} 
+          alt={fullProductName} 
           className="w-full h-full object-contain p-3 md:p-4 transition-transform duration-500 group-hover:scale-105"
         />
         {onSale && (
@@ -37,12 +41,13 @@ const CompactProductCard = ({ product }) => {
       </a>
       
       <div className="p-3 md:p-4 flex flex-col flex-grow">
-        <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-brand-blue transition-colors duration-300 mb-1 h-10 sm:h-12 flex items-center" title={nameString}>
+       
+        <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-brand-blue transition-colors duration-300 mb-1 h-10 sm:h-12 flex items-center" title={fullProductName}>
           <a href={productLink || '#'} className="line-clamp-2 hover:underline">
-            {nameString}
+            {fullProductName}
           </a>
         </h3>
-        
+      
         {shortDescription && (
           <p className="text-xs text-brand-gray-light mb-2 truncate h-4" title={shortDescription}>
             {shortDescription}
@@ -61,7 +66,7 @@ const CompactProductCard = ({ product }) => {
         </div>
       </div>
 
-      <a href={productLink || '#'} className="absolute bottom-3 right-3 w-10 h-10 md:w-12 md:h-12 bg-brand-blue rounded-full flex items-center justify-center text-white shadow-md hover:bg-blue-700 transition-all duration-300 opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 focus:outline-none" title="Подробнее">
+      <a href={productLink || '#'} className="absolute bottom-3 right-3 w-10 h-10 md:w-12 md:h-12 bg-brand-blue rounded-full flex items-center justify-center text-white shadow-md hover:bg-brand-blue hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 focus:outline-none" title="Подробнее">
         <FiArrowUpRight className="w-5 h-5 md:w-6 md:h-6" />
       </a>
     </div>
