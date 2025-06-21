@@ -16,6 +16,9 @@ const brandsData = [
   { id: 5, name: 'Realme', logoUrl: '/images/brands/realme-logo.png', filterValue: 'Realme' },
   { id: 6, name: 'Sony', logoUrl: '/images/brands/sony-logo.png', filterValue: 'Sony' },
   { id: 7, name: 'Infinix', logoUrl: '/images/brands/infinix-logo.png', filterValue: 'Infinix' },
+  { id: 8, name: 'Gorenje', logoUrl: '/images/brands/gorenje-logo.png', filterValue: 'Gorenje' },
+  { id: 9, name: 'Haier', logoUrl: '/images/brands/haier-logo.png', filterValue: 'Haier' },
+  { id: 10, name: 'Reoka', logoUrl: '/images/brands/reoka-logo.png', filterValue: 'Reoka' },
 ];
 
 const BrandsCarousel = () => {

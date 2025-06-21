@@ -44,37 +44,37 @@ const getProductByIdForAdmin = asyncHandler(async (req, res) => {
 });
 
 // @desc    Создать новый товар (черновик)
-// @desc    Создать новый товар (черновик)
 const createProduct = asyncHandler(async (req, res) => {
   const timestamp = Date.now();
   const isCopy = Object.keys(req.body).length > 1;
   let productData;
-  const newCustomId = `product-${timestamp}`; // <-- Генерируем ID один раз
+  const newCustomId = `product-${timestamp}`;
 
   if (isCopy) {
-      const { _id, createdAt, updatedAt, ...copyData } = req.body;
+      // --- ИЗМЕНЕНИЕ: Убираем отзывы и рейтинг при копировании ---
+      const { _id, createdAt, updatedAt, reviews, rating, numReviews, ...copyData } = req.body;
       productData = { 
           ...copyData, 
-          customId: newCustomId, // <-- Используем новый ID
-          productLink: `/product/${newCustomId}`, // <-- АВТОМАТИЧЕСКИ ГЕНЕРИРУЕМ ССЫЛКУ
+          customId: newCustomId,
+          productLink: `/product/${newCustomId}`,
           isPublished: false, 
-          user: req.user._id 
+          user: req.user._id,
+          // Сбрасываем рейтинг и отзывы для новой копии
+          reviews: [],
+          rating: 0,
+          numReviews: 0
       };
   } else {
       productData = {
           name: [`Новый товар ${timestamp}`],
-          customId: newCustomId, // <-- Используем новый ID
+          customId: newCustomId,
           groupId: `group-${timestamp}`,
-          productLink: `/product/${newCustomId}`, // <-- АВТОМАТИЧЕСКИ ГЕНЕРИРУЕМ ССЫЛКУ
+          productLink: `/product/${newCustomId}`,
           user: req.user._id,
           isPublished: false,
-          imageUrl: '/images/placeholder.png', 
-          price: '0 ₽', 
-          priceValue: 0,
-          manufacturer: 'Не указан', 
-          countInStock: 0,
-          rating: 0, 
-          numReviews: 0,
+          imageUrl: '/images/placeholder.png', price: '0 ₽', priceValue: 0,
+          manufacturer: 'Не указан', countInStock: 0,
+          rating: 0, numReviews: 0,
       };
   }
   const product = new Product(productData);
@@ -87,14 +87,13 @@ const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ customId: req.params.customId });
   if (product) {
       const updateData = { ...req.body };
-      // Принудительно обновляем productLink на основе customId из данных
       if (updateData.customId) {
           updateData.productLink = `/product/${updateData.customId}`;
       }
       
       const updatedProduct = await Product.findByIdAndUpdate(
           product._id, 
-          updateData, // <-- Используем измененные данные
+          updateData,
           { new: true, runValidators: true } 
       );
       res.json(updatedProduct);
@@ -124,26 +123,46 @@ const createProductReview = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Оценка и комментарий обязательны');
     }
+    
+    // Находим текущий вариант товара, чтобы получить его groupId
     const product = await Product.findOne({ customId: req.params.customId });
-    if (product) {
-        if (!product.isPublished) {
+
+    if (product && product.groupId) {
+        // Проверяем, оставлял ли пользователь отзыв на ЛЮБОЙ товар из этой группы
+        const productsInGroup = await Product.find({ groupId: product.groupId });
+        const hasReviewedInGroup = productsInGroup.some(p =>
+            p.reviews.some(r => r.user.toString() === req.user._id.toString())
+        );
+
+        if (hasReviewedInGroup) {
             res.status(400);
-            throw new Error('Нельзя оставить отзыв на неопубликованный товар');
+            throw new Error('Вы уже оставляли отзыв на эту модель товара');
         }
-        const alreadyReviewed = product.reviews.find(r => r.user.toString() === req.user._id.toString());
-        if (alreadyReviewed) {
-            res.status(400);
-            throw new Error('Вы уже оставляли отзыв на этот товар');
-        }
+
         const review = { name: req.user.name, rating: Number(rating), comment, user: req.user._id };
-        product.reviews.push(review);
-        product.numReviews = product.reviews.length;
-        product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
-        await product.save();
+        
+        // Добавляем отзыв ко ВСЕМ товарам в группе
+        await Product.updateMany(
+            { groupId: product.groupId },
+            { $push: { reviews: review } }
+        );
+
+        // Пересчитываем рейтинг для ВСЕХ товаров в группе
+        // Для этого получим обновленный документ любого товара из группы
+        const updatedProductForRating = await Product.findOne({ groupId: product.groupId });
+        const reviews = updatedProductForRating.reviews;
+        const numReviews = reviews.length;
+        const newRating = reviews.reduce((acc, item) => item.rating + acc, 0) / numReviews;
+
+        await Product.updateMany(
+            { groupId: product.groupId },
+            { $set: { rating: newRating, numReviews: numReviews } }
+        );
+
         res.status(201).json({ message: 'Отзыв добавлен' });
     } else {
         res.status(404);
-        throw new Error('Товар не найден');
+        throw new Error('Товар или группа товаров не найдены');
     }
 });
 

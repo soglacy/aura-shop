@@ -57,7 +57,7 @@ const RegisterPage = () => {
               <div>
                 <input id="name" name="name" type="text" autoComplete="name" required
                        className="w-full px-4 py-3 bg-brand-item-bg border-2 border-transparent rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent transition-all"
-                       placeholder="Имя" value={name} onChange={(e) => setName(e.target.value)} />
+                       placeholder="Логин" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div>
                 <input id="email-address" name="email" type="email" autoComplete="email" required

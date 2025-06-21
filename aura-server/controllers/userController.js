@@ -1,42 +1,52 @@
 // aura-server/controllers/userController.js
 const asyncHandler = require('express-async-handler');
 const User = require('../models/UserModel');
-const generateToken = require('../config/generateToken'); // Проверьте путь, если utils/
+const generateToken = require('../config/generateToken');
 const Notification = require('../models/NotificationModel'); 
 
 // @desc    Зарегистрировать нового пользователя
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password } = req.body; // name теперь это логин
 
   if (!name || !email || !password) {
     res.status(400);
     throw new Error('Пожалуйста, заполните все поля');
   }
 
-  const userExists = await User.findOne({ email });
+  // --- ИЗМЕНЕНИЕ: Проверяем и логин, и email на уникальность ---
+  const loginExists = await User.findOne({ name });
+  if (loginExists) {
+    res.status(400);
+    throw new Error('Пользователь с таким логином уже существует');
+  }
 
-  if (userExists) {
+  const emailExists = await User.findOne({ email });
+  if (emailExists) {
     res.status(400);
     throw new Error('Пользователь с таким email уже существует');
   }
 
+  // Проверка длины пароля на сервере (соответствует minlength в модели)
+  if (password.length < 6) {
+      res.status(400);
+      throw new Error('Пароль должен быть не менее 6 символов');
+  }
+
   const user = await User.create({
-    name,
+    name, // name (логин)
     email,
-    password, // Пароль будет хеширован pre-save хуком в модели
+    password, 
   });
 
   if (user) {
-      // --- НАЧАЛО БЛОКА УВЕДОМЛЕНИЙ ---
     await Notification.create({
         user: user._id,
         title: 'Добро пожаловать в Aura Shop!',
         message: `Спасибо за регистрацию, ${user.name}! Надеемся, вам у нас понравится.`,
         link: '/profile'
     });
-     // --- КОНЕЦ БЛОКА УВЕДОМЛЕНИЙ ---
      
     res.status(201).json({
       _id: user._id,
@@ -103,7 +113,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route   GET /api/users
 // @access  Private/Admin
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({}).select('-password'); // Находим всех, убираем пароли из ответа
+  const users = await User.find({}).select('-password');
   res.json(users);
 });
 
@@ -164,8 +174,8 @@ module.exports = {
   registerUser, 
   loginUser, 
   getUserProfile, 
-  getUsers, // <-- Экспортируем новую функцию
-  deleteUser, // <-- Новая функция
+  getUsers,
+  deleteUser,
   updateUser,
-  getUserById, // <-- Новая функция
+  getUserById,
 };
