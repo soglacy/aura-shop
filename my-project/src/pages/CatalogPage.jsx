@@ -1,11 +1,11 @@
 // src/pages/CatalogPage.jsx
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CatalogProductRowCard from '../components/products/CatalogProductRowCard';
 import ProductFilters from '../components/products/ProductFilters';
 import PageHeader from '../components/common/PageHeader';
-import { FaFilter, FaTimes, FaSearch, FaSpinner } from 'react-icons/fa'; // Добавил FaSpinner
+import { FaFilter, FaTimes, FaSearch } from 'react-icons/fa'; // Добавил FaSpinner
 
 // Скелетон можно не менять, он хороший
 const ProductSkeleton = () => (
@@ -34,8 +34,7 @@ const CatalogPage = () => {
     const navigate = useNavigate();
 
     const [allProducts, setAllProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);   
     const [priceBounds, setPriceBounds] = useState({ min: 0, max: 200000 });
     const [filters, setFilters] = useState(null); // Инициализируем как null, чтобы показать загрузку
     const [showFiltersMobile, setShowFiltersMobile] = useState(false);
@@ -105,7 +104,7 @@ const CatalogPage = () => {
         // Используем replace, чтобы не засорять историю браузера
         navigate(`${location.pathname}?${params.toString()}`, { replace: true });
 
-    }, [filters, navigate, location.pathname, priceBounds]); // <-- Зависит только от `filters`
+    }, [filters, navigate, location.pathname, priceBounds, location.search]); // <-- Зависит только от `filters`
 
     // --- ИЗМЕНЕНИЕ 2: Упрощаем обработчик ---
     const handleFilterChange = (filterName, value) => {

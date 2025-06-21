@@ -6,7 +6,7 @@ const CompactProductCard = ({ product }) => {
   if (!product) return null;
 
   // Логика получения данных остается прежней
-  const { imageUrl, name, productLink, shortDescription, priceValue, salePriceValue, onSale, ram, storage, color } = product; 
+  const { imageUrl, name, productLink, priceValue, salePriceValue, onSale, ram, storage, color } = product; 
   
   const fullProductName = [
     name?.[0] || 'Название товара',

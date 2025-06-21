@@ -1,6 +1,6 @@
 // src/pages/admin/AdminUserListPage.jsx
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { FaSpinner, FaTrash, FaCheck, FaTimes, FaUserShield, FaUser } from 'react-icons/fa';
@@ -11,13 +11,13 @@ const AdminUserListPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const { userInfo, loadingAuth } = useAuth();
-    const navigate = useNavigate();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalAction, setModalAction] = useState(null);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
+        if (!userInfo) return;
         setLoading(true);
         setError('');
         try {
@@ -29,17 +29,13 @@ const AdminUserListPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userInfo]);
 
     useEffect(() => {
-        if (loadingAuth) return; // Ждем окончания проверки авторизации
-
-        if (userInfo && userInfo.isAdmin) {
+        if (!loadingAuth && userInfo && userInfo.isAdmin) {
             fetchUsers();
-        } else {
-            navigate('/login');
         }
-    }, [userInfo, loadingAuth, navigate]);
+    }, [userInfo, loadingAuth, fetchUsers]);
 
     const openConfirmationModal = (action, content) => {
         setModalAction(() => action);
@@ -94,12 +90,7 @@ const AdminUserListPage = () => {
 
     return (
         <>
-            <ConfirmationModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onConfirm={modalAction} 
-                {...modalContent} 
-            />
+            <ConfirmationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={modalAction} {...modalContent} />
             <div>
                 <h1 className="text-2xl font-semibold text-white mb-6">Пользователи ({users.length})</h1>
                 <div className="bg-brand-bg-black shadow-xl rounded-lg overflow-x-auto">
@@ -107,7 +98,7 @@ const AdminUserListPage = () => {
                         <thead className="bg-gray-800/50">
                             <tr>
                                 <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Имя</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Логин</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
                                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Админ</th>
                                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Действия</th>
@@ -117,30 +108,14 @@ const AdminUserListPage = () => {
                             {users.map((user) => (
                                 <tr key={user._id} className="hover:bg-gray-800/30 transition-colors">
                                     <td className="px-4 py-4 whitespace-nowrap text-xs text-gray-400">{user._id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                        <Link to={`/admin/user/${user._id}`} className="hover:text-brand-blue hover:underline">
-                                            {user.name}
-                                        </Link>
-                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white"><Link to={`/admin/user/${user._id}`} className="hover:text-brand-blue hover:underline">{user.name}</Link></td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                                        {user.isAdmin ? <FaCheck className="text-green-500 mx-auto" /> : <FaTimes className="text-red-500 mx-auto" />}
-                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-center">{user.isAdmin ? <FaCheck className="text-green-500 mx-auto" /> : <FaTimes className="text-red-500 mx-auto" />}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                        {/* Нельзя менять права или удалять самого себя */}
                                         {userInfo._id !== user._id && (
                                             <>
-                                                <button onClick={() => toggleAdminHandler(user)} title={user.isAdmin ? "Снять права админа" : "Сделать админом"}
-                                                        className={`p-1.5 rounded-md inline-flex transition-colors ${user.isAdmin ? 'text-yellow-400 bg-yellow-600/20 hover:bg-yellow-600/30' : 'text-green-400 bg-green-600/20 hover:bg-green-600/30'}`}>
-                                                    {user.isAdmin ? <FaUser /> : <FaUserShield />}
-                                                </button>
-                                                
-                                                {/* Нельзя удалять других админов */}
-                                                {!user.isAdmin && (
-                                                    <button onClick={() => deleteHandler(user)} className="text-red-400 hover:text-red-300 p-1.5 bg-red-600/20 hover:bg-red-600/30 rounded-md inline-flex">
-                                                        <FaTrash />
-                                                    </button>
-                                                )}
+                                                <button onClick={() => toggleAdminHandler(user)} title={user.isAdmin ? "Снять права админа" : "Сделать админом"} className={`p-1.5 rounded-md inline-flex transition-colors ${user.isAdmin ? 'text-yellow-400 bg-yellow-600/20 hover:bg-yellow-600/30' : 'text-green-400 bg-green-600/20 hover:bg-green-600/30'}`}>{user.isAdmin ? <FaUser /> : <FaUserShield />}</button>
+                                                {!user.isAdmin && (<button onClick={() => deleteHandler(user)} className="text-red-400 hover:text-red-300 p-1.5 bg-red-600/20 hover:bg-red-600/30 rounded-md inline-flex"><FaTrash /></button>)}
                                             </>
                                         )}
                                     </td>

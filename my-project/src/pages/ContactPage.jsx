@@ -1,5 +1,5 @@
 // src/pages/ContactPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaPaperPlane, FaSpinner } from 'react-icons/fa';
 import PageHeader from '../components/common/PageHeader';
 import axios from 'axios';

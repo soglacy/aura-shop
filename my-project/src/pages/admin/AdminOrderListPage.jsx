@@ -1,5 +1,5 @@
 // src/pages/admin/AdminOrderListPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { FaSpinner, FaCheck, FaTimes, FaTruck, FaTrash, FaUndo } from 'react-icons/fa';
@@ -15,12 +15,11 @@ const AdminOrderListPage = () => {
     const [modalAction, setModalAction] = useState(null);
     const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            // Запрашиваем ВСЕ заказы для админа
             const { data } = await axios.get('/api/orders', config);
             setOrders(data);
         } catch (err) {
@@ -28,13 +27,13 @@ const AdminOrderListPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userInfo]);
 
     useEffect(() => {
         if (userInfo && userInfo.isAdmin) {
             fetchOrders();
         }
-    }, [userInfo]);
+    }, [userInfo, fetchOrders]);
 
     const openConfirmationModal = (action, content) => {
         setModalAction(() => action);
@@ -108,13 +107,8 @@ const AdminOrderListPage = () => {
                                     <td className="px-6 py-4 text-center">{order.isPaid ? <FaCheck className="text-green-500 mx-auto" /> : <FaTimes className="text-red-500 mx-auto" />}</td>
                                     <td className="px-6 py-4 text-center">{order.isDelivered ? <FaCheck className="text-green-500 mx-auto" /> : <FaTimes className="text-red-500 mx-auto" />}</td>
                                     <td className="px-4 py-4 text-right text-sm space-x-2">
-                                        <button onClick={() => handleDeliverToggle(order)} title={order.isDelivered ? "Отменить доставку" : "Отметить как доставленный"}
-                                                className={`p-1.5 rounded-md inline-flex transition-colors ${order.isDelivered ? 'text-yellow-400 bg-yellow-600/20 hover:bg-yellow-600/30' : 'text-green-400 bg-green-600/20 hover:bg-green-600/30'}`}>
-                                            {order.isDelivered ? <FaUndo /> : <FaTruck />}
-                                        </button>
-                                        <button onClick={() => deleteHandler(order._id)} title="Удалить заказ" className="text-red-400 hover:text-red-300 p-1.5 bg-red-600/20 hover:bg-red-600/30 rounded-md inline-flex">
-                                            <FaTrash />
-                                        </button>
+                                        <button onClick={() => handleDeliverToggle(order)} title={order.isDelivered ? "Отменить доставку" : "Отметить как доставленный"} className={`p-1.5 rounded-md inline-flex transition-colors ${order.isDelivered ? 'text-yellow-400 bg-yellow-600/20 hover:bg-yellow-600/30' : 'text-green-400 bg-green-600/20 hover:bg-green-600/30'}`}><FaTruck /></button>
+                                        <button onClick={() => deleteHandler(order._id)} title="Удалить заказ" className="text-red-400 hover:text-red-300 p-1.5 bg-red-600/20 hover:bg-red-600/30 rounded-md inline-flex"><FaTrash /></button>
                                     </td>
                                 </tr>
                             ))}

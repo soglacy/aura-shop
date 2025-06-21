@@ -1,10 +1,9 @@
 // src/pages/admin/AdminMessagesPage.jsx
-import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { FaSpinner, FaEnvelopeOpen, FaTrash, FaReply, FaPaperPlane } from 'react-icons/fa';
-import eventBus from '../../utils/eventBus'; // <<< ИМПОРТ eventBus
+import eventBus from '../../utils/eventBus';
 
 // Вспомогательный компонент для одной карточки сообщения
 const MessageCard = ({ msg, onUpdate }) => {
@@ -40,24 +39,17 @@ const MessageCard = ({ msg, onUpdate }) => {
         if (!replyText.trim()) return;
         setIsReplying(true);
         try {
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${userInfo.token}`
-                }
-            };
+            const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${userInfo.token}` } };
             const body = { message: replyText }; 
             await axios.post(`/api/messages/${msg._id}/reply`, body, config);
             
-            // <<< ГЛАВНОЕ ИЗМЕНЕНИЕ: Отправляем событие для обновления хедера >>>
             eventBus.dispatch('notificationsUpdated');
 
             setReplyText('');
             setShowReplyForm(false);
-            onUpdate(); // Обновляем список сообщений на текущей странице
+            onUpdate();
         } catch (error) {
             const errorMessage = error.response?.data?.message || error.message || 'Произошла неизвестная ошибка';
-            console.error("Ошибка отправки ответа:", error.response || error);
             alert(`Ошибка отправки ответа: ${errorMessage}`);
         } finally {
             setIsReplying(false);
@@ -73,17 +65,9 @@ const MessageCard = ({ msg, onUpdate }) => {
                     <p className="text-sm text-brand-blue">{`${msg.name} <${msg.email}>`}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                    <button onClick={() => setShowReplyForm(!showReplyForm)} title="Ответить" className="text-blue-400 hover:text-blue-300 p-2 bg-blue-600/10 hover:bg-blue-600/30 rounded-full">
-                        <FaReply />
-                    </button>
-                    {!msg.isRead && (
-                        <button onClick={handleMarkAsRead} title="Отметить как прочитанное" className="text-green-400 hover:text-green-300 p-2 bg-green-600/10 hover:bg-green-600/30 rounded-full">
-                            <FaEnvelopeOpen />
-                        </button>
-                    )}
-                    <button onClick={handleDelete} title="Удалить" className="text-red-400 hover:text-red-300 p-2 bg-red-600/10 hover:bg-red-600/30 rounded-full">
-                        <FaTrash />
-                    </button>
+                    <button onClick={() => setShowReplyForm(!showReplyForm)} title="Ответить" className="text-blue-400 hover:text-blue-300 p-2 bg-blue-600/10 hover:bg-blue-600/30 rounded-full"><FaReply /></button>
+                    {!msg.isRead && (<button onClick={handleMarkAsRead} title="Отметить как прочитанное" className="text-green-400 hover:text-green-300 p-2 bg-green-600/10 hover:bg-green-600/30 rounded-full"><FaEnvelopeOpen /></button>)}
+                    <button onClick={handleDelete} title="Удалить" className="text-red-400 hover:text-red-300 p-2 bg-red-600/10 hover:bg-red-600/30 rounded-full"><FaTrash /></button>
                 </div>
             </div>
             <p className="mt-3 pt-3 border-t border-brand-border-gray/30 text-sm text-gray-300 whitespace-pre-wrap">{msg.message}</p>
@@ -102,8 +86,7 @@ const MessageCard = ({ msg, onUpdate }) => {
 
             {showReplyForm && (
                 <form onSubmit={handleReplySubmit} className="mt-4 pt-4 border-t border-dashed border-brand-border-gray/50">
-                    <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)}
-                              className="w-full bg-brand-item-bg rounded-md p-2 text-white focus:ring-brand-blue focus:border-brand-blue" rows="3" placeholder="Ваш ответ..."></textarea>
+                    <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} className="w-full bg-brand-item-bg rounded-md p-2 text-white focus:ring-brand-blue focus:border-brand-blue" rows="3" placeholder="Ваш ответ..."></textarea>
                     <button type="submit" disabled={isReplying} className="mt-2 px-4 py-1.5 bg-brand-blue hover:bg-blue-700 text-white rounded-md text-sm flex items-center gap-2 disabled:opacity-50">
                         {isReplying ? <FaSpinner className="animate-spin"/> : <FaPaperPlane/>}
                         Отправить ответ
@@ -120,10 +103,10 @@ const AdminMessagesPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const { userInfo } = useAuth();
-    const { refreshMessageCount } = useOutletContext();
 
-    const fetchMessages = async () => {
+    const fetchMessages = useCallback(async () => {
         if (!userInfo) return;
+        setLoading(true);
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get('/api/messages', config);
@@ -133,16 +116,15 @@ const AdminMessagesPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userInfo]);
 
     useEffect(() => {
-        setLoading(true);
         fetchMessages();
-    }, [userInfo]);
+    }, [fetchMessages]);
     
     const handleUpdate = () => {
         fetchMessages();
-        if(refreshMessageCount) refreshMessageCount();
+        eventBus.dispatch('notificationsUpdated'); 
     };
 
     if (loading) return <div className="text-center p-8"><FaSpinner className="animate-spin text-brand-blue text-4xl mx-auto" /></div>;

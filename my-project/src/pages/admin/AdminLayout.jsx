@@ -1,6 +1,6 @@
 // src/pages/admin/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
-import { NavLink, Outlet, useNavigate, Link, useOutletContext } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { FaTachometerAlt, FaBoxOpen, FaShoppingCart, FaUsers, FaSignOutAlt, FaInbox } from 'react-icons/fa';

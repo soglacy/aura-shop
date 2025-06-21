@@ -14,7 +14,7 @@ const ScrollToTop = () => {
     }
     // Если флаг есть, мы просто ничего не делаем, и страница остается на месте.
 
-  }, [location.pathname]); // Зависимость от pathname остается прежней
+  }, [location.pathname, location.state]); // Зависимость от pathname остается прежней
 
   return null;
 };

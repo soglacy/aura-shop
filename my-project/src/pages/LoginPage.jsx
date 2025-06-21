@@ -63,7 +63,7 @@ const LoginPage = () => {
               </div>
               
               <div className="flex items-center justify-end text-sm">
-                <a href="#" className="font-medium text-brand-blue hover:text-blue-400">Забыли пароль?</a>
+                <button type="button" className="font-medium text-brand-blue hover:text-blue-400">Забыли пароль?</button>
               </div>
 
               <div>
