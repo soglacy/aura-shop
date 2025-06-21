@@ -5,9 +5,8 @@ import axios from 'axios';
 import CatalogProductRowCard from '../components/products/CatalogProductRowCard';
 import ProductFilters from '../components/products/ProductFilters';
 import PageHeader from '../components/common/PageHeader';
-import { FaFilter, FaTimes, FaSearch } from 'react-icons/fa'; // Добавил FaSpinner
+import { FaFilter, FaTimes, FaSearch } from 'react-icons/fa';
 
-// Скелетон можно не менять, он хороший
 const ProductSkeleton = () => (
     <div className="flex flex-col md:flex-row bg-brand-bg-black rounded-xl shadow-lg overflow-hidden mb-6 animate-pulse">
         <div className="md:w-1/3 lg:w-1/5 bg-gray-700 aspect-square md:aspect-auto"></div>
@@ -34,31 +33,23 @@ const CatalogPage = () => {
     const navigate = useNavigate();
 
     const [allProducts, setAllProducts] = useState([]);
-    const [loading, setLoading] = useState(true);   
+    const [loading, setLoading] = useState(true);
     const [priceBounds, setPriceBounds] = useState({ min: 0, max: 200000 });
-    const [filters, setFilters] = useState(null); // Инициализируем как null, чтобы показать загрузку
+    const [filters, setFilters] = useState(null);
     const [showFiltersMobile, setShowFiltersMobile] = useState(false);
     
-    // --- ИЗМЕНЕНИЕ 1: Разделяем логику на два useEffect ---
-
-    // useEffect для ПЕРВОНАЧАЛЬНОЙ загрузки данных и установки фильтров из URL
     useEffect(() => {
-    const fetchAndSetInitialState = async () => {
-        setLoading(true);
-        try {
-            // === ИЗМЕНИТЬ ЗДЕСЬ ===
-            // Мы должны запрашивать /api/products, который теперь будет 
-            // отдавать плоский список всех вариантов из базы данных.
-            const { data } = await axios.get('/api/products'); 
-            
-            setAllProducts(data);
+        const fetchAndSetInitialState = async () => {
+            setLoading(true);
+            try {
+                const { data } = await axios.get('/api/products'); 
+                setAllProducts(data);
                 
                 const maxPriceFromServer = Math.max(...data.map(p => p.priceValue), 0);
                 const calculatedMax = Math.ceil(maxPriceFromServer / 10000) * 10000 || 200000;
                 const calculatedBounds = { min: 0, max: calculatedMax };
                 setPriceBounds(calculatedBounds);
 
-                // Устанавливаем фильтры из URL при первой загрузке
                 const params = new URLSearchParams(location.search);
                 setFilters({
                     keyword: params.get('keyword') || '',
@@ -73,21 +64,19 @@ const CatalogPage = () => {
                 });
 
             } catch (e) {
-                setError(e.message || "Не удалось загрузить товары.");
+                // --- ИСПРАВЛЕНИЕ: Просто выводим ошибку в консоль ---
+                console.error("Не удалось загрузить товары:", e.message || e);
             } finally {
                 setLoading(false);
             }
         };
         fetchAndSetInitialState();
-    }, []); // <-- Пустой массив зависимостей. Запускается ОДИН раз.
+    }, [location.search]); // <-- ИСПРАВЛЕНИЕ: location.search - правильная зависимость для парсинга URL
 
-    // useEffect для СИНХРОНИЗАЦИИ состояния фильтров в URL
     useEffect(() => {
-        // Не обновляем URL, пока фильтры не инициализированы
         if (!filters) {
             return;
         }
-
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null && value !== '' && value.length !== 0) {
@@ -101,12 +90,10 @@ const CatalogPage = () => {
                 }
             }
         });
-        // Используем replace, чтобы не засорять историю браузера
         navigate(`${location.pathname}?${params.toString()}`, { replace: true });
 
-    }, [filters, navigate, location.pathname, priceBounds, location.search]); // <-- Зависит только от `filters`
+    }, [filters, navigate, location.pathname, priceBounds]);
 
-    // --- ИЗМЕНЕНИЕ 2: Упрощаем обработчик ---
     const handleFilterChange = (filterName, value) => {
         setFilters(prevFilters => ({
             ...prevFilters,
@@ -137,7 +124,6 @@ const CatalogPage = () => {
         });
     }, [allProducts, filters, loading]);
     
-    // --- ИЗМЕНЕНИЕ 3: Более надежная проверка на загрузку ---
     const showLoadingState = loading || !filters;
 
     return (
@@ -146,9 +132,7 @@ const CatalogPage = () => {
             
             <div className="container mx-auto px-4 py-8 md:py-12">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* --- ИЗМЕНЕНИЕ 4: Добавляем 'sticky' для фильтров --- */}
                     <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start">
-                        {/* Мобильная версия фильтров (сайдбар) */}
                         <div className={`fixed top-0 left-0 z-50 h-full w-full max-w-xs bg-brand-bg-black p-6 overflow-y-auto transform transition-transform lg:hidden ${showFiltersMobile ? 'translate-x-0' : '-translate-x-full'}`}>
                              <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-semibold">Фильтры</h2>
@@ -165,7 +149,6 @@ const CatalogPage = () => {
                             )}
                         </div>
 
-                        {/* Десктопная версия фильтров (встраиваемая) */}
                         <div className="hidden lg:block">
                              {!showLoadingState ? (
                                 <ProductFilters 
