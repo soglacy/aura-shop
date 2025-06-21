@@ -96,8 +96,8 @@ const AdminDashboardPage = () => {
     const [error, setError] = useState('');
     const [homepageContent, setHomepageContent] = useState({
         sliderBanners: [],
-        featuredProducts: [],
-        trendingProducts: [],
+        featuredProducts: Array(4).fill(null),
+        trendingProducts: Array(4).fill(null),
         blogPosts: [],
     });
     const [allProducts, setAllProducts] = useState([]);
@@ -114,17 +114,28 @@ const AdminDashboardPage = () => {
                     axios.get('/api/products?from=admin')
                 ]);
                 
-                const blogPostsWithKeys = (contentRes.data.blogPosts || []).map(post => ({ ...post, _id: post.slug || post.title }));
-                const slidersWithKeys = (contentRes.data.sliderBanners || []).map((slide, i) => ({ ...slide, _id: slide.buttonLink || i.toString() }));
+                const normalizeProductSection = (products = [], count = 4) => {
+                    const normalized = Array(count).fill(null);
+                    if (Array.isArray(products)) {
+                        products.slice(0, count).forEach((p, i) => {
+                            if (p) normalized[i] = p;
+                        });
+                    }
+                    return normalized;
+                };
 
+                const contentData = contentRes.data || {};
+                
                 setHomepageContent({ 
-                    ...(contentRes.data || {}), 
-                    blogPosts: blogPostsWithKeys,
-                    sliderBanners: slidersWithKeys,
+                    ...contentData, 
+                    featuredProducts: normalizeProductSection(contentData.featuredProducts),
+                    trendingProducts: normalizeProductSection(contentData.trendingProducts),
+                    blogPosts: (contentData.blogPosts || []).map(post => ({ ...post, _id: post.slug || post.title })),
+                    sliderBanners: (contentData.sliderBanners || []).map((slide, i) => ({ ...slide, _id: slide.buttonLink || i.toString() })),
                 });
                 setAllProducts(productsRes.data);
             } catch (err) {
-                setError('Ошибка загрузки данных для дашборда. ' + (err.response?.data?.message || err.message));
+                setError('Ошибка загрузки данных. ' + (err.response?.data?.message || err.message));
             } finally {
                 setLoading(false);
             }
@@ -140,22 +151,26 @@ const AdminDashboardPage = () => {
     const handleProductSelect = (selectedProduct) => {
         const { section, index } = editingConfig;
         setHomepageContent(prev => {
-            const currentItems = prev[section] ? [...prev[section]] : [];
-            if (index < currentItems.length) {
-                currentItems[index] = selectedProduct;
-            } else {
-                currentItems.push(selectedProduct);
-            }
-            return { ...prev, [section]: currentItems };
+            const newSectionData = [...prev[section]];
+            newSectionData[index] = selectedProduct;
+            return { ...prev, [section]: newSectionData };
         });
         setIsModalOpen(false);
     };
 
     const handleRemoveItem = (section, index) => {
-        setHomepageContent(prev => ({
-            ...prev,
-            [section]: prev[section].filter((_, i) => i !== index),
-        }));
+        if (section === 'featuredProducts' || section === 'trendingProducts') {
+            setHomepageContent(prev => {
+                const newSectionData = [...prev[section]];
+                newSectionData[index] = null;
+                return { ...prev, [section]: newSectionData };
+            });
+        } else {
+            setHomepageContent(prev => ({
+                ...prev,
+                [section]: prev[section].filter((_, i) => i !== index),
+            }));
+        }
     };
     
     const slugify = (text = '') => {
@@ -255,21 +270,18 @@ const AdminDashboardPage = () => {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const blogPosts = homepageContent.blogPosts || [];
             const slugs = blogPosts.map(p => p.slug);
-
             if (slugs.some(slug => !slug || slug.trim() === '')) {
                 throw new Error("У одного из постов пустой URL-слаг. Пожалуйста, заполните его.");
             }
             if (slugs.some((slug, index) => slugs.indexOf(slug) !== index)) {
                 throw new Error("Найдены одинаковые URL-слаги. Каждый слаг должен быть уникальным.");
             }
-
             const payload = {
                 sliderBanners: homepageContent.sliderBanners.map(({_id, ...slide}) => slide),
-                featuredProducts: homepageContent.featuredProducts.map(p => p._id),
-                trendingProducts: homepageContent.trendingProducts.map(p => p._id),
+                featuredProducts: homepageContent.featuredProducts.filter(p => p).map(p => p._id),
+                trendingProducts: homepageContent.trendingProducts.filter(p => p).map(p => p._id),
                 blogPosts: homepageContent.blogPosts.map(({_id, ...post}) => post),
             };
-            
             await axios.put('/api/content/homepage', payload, config);
             alert('Изменения сохранены!');
         } catch (err) {
@@ -282,14 +294,13 @@ const AdminDashboardPage = () => {
     if (loading) return <div className="p-8 text-center"><FaSpinner className="animate-spin text-4xl text-brand-blue" /></div>;
 
     const renderSection = (title, sectionKey, count) => {
-        const items = homepageContent[sectionKey] || [];
-        const displayItems = Array.from({ length: count });
+        const items = homepageContent[sectionKey] || Array(count).fill(null);
         return (
             <div className="bg-brand-bg-black p-6 rounded-lg shadow-lg">
                 <h2 className="text-xl font-semibold text-white mb-4">{title}</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {displayItems.map((_, index) => {
-                        const product = items[index];
+                    {items.map((product, index) => {
+                        if (index >= count) return null;
                         if (product) {
                             return <DashboardProductCard key={product._id || index} product={product} onClick={() => handleOpenModal(sectionKey, index)} onRemove={() => handleRemoveItem(sectionKey, index)} />;
                         } else {
